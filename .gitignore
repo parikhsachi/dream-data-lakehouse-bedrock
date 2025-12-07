@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+.venv/
+
+# Environment variables
+.env
+*.env
+
+# macOS
+.DS_Store
+
+# Node
+node_modules/
+
+# AWS CLI cache
+.aws-sam/
+.aws/
+
+# Logs
+*.log
+
+# IDE configs (optional but common)
+.vscode/

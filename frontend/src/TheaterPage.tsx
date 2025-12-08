@@ -5,6 +5,7 @@ interface DreamRenderResponse {
   movie_script: string;
   psychoanalysis: string;
   style_profile?: any;
+  video_url?: string | null; // 👈 NEW
 }
 
 type TheaterPageProps = {
@@ -50,8 +51,7 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({ dreamId, onExit }) => 
       style={{
         minHeight: "100vh",
         position: "relative",
-        background:
-          "radial-gradient(circle at top, #2b1444, #0a0314 70%)",
+        background: "radial-gradient(circle at top, #2b1444, #0a0314 70%)",
         fontFamily: "'Georgia', serif",
         overflow: "hidden",
         color: "#fbeaff",
@@ -140,6 +140,54 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({ dreamId, onExit }) => 
             zIndex: 1,
           }}
         >
+          {/* SCREEN + VIDEO */}
+          {data.video_url && (
+            <div
+              style={{
+                marginBottom: "2.5rem",
+                padding: "0.9rem",
+                borderRadius: "1.4rem",
+                background:
+                  "radial-gradient(circle at top, #f7e3ff 0, #4b205f 40%, #140415 100%)",
+                boxShadow:
+                  "0 22px 45px rgba(0,0,0,0.7), inset 0 0 35px rgba(0,0,0,0.7)",
+                border: "1px solid rgba(250,230,255,0.3)",
+              }}
+            >
+              <div
+                style={{
+                  borderRadius: "1rem",
+                  overflow: "hidden",
+                  backgroundColor: "black",
+                }}
+              >
+                <video
+                  src={data.video_url}
+                  controls
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    maxHeight: "60vh",
+                    backgroundColor: "black",
+                  }}
+                />
+              </div>
+              <div
+                style={{
+                  marginTop: "0.4rem",
+                  textAlign: "center",
+                  fontSize: "0.8rem",
+                  letterSpacing: "0.12em",
+                  textTransform: "uppercase",
+                  color: "#fbe8ff",
+                  opacity: 0.8,
+                }}
+              >
+                Now showing: your dream
+              </div>
+            </div>
+          )}
+
           {/* Movie */}
           <h1
             style={{
@@ -218,3 +266,4 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({ dreamId, onExit }) => 
     </div>
   );
 };
+export default TheaterPage;

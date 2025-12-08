@@ -8,19 +8,20 @@ from typing import Dict, Any, List, Optional
 import boto3
 
 from .schemas import Dream, DreamRenderResponse, PsychoMetadata
-
+from botocore.exceptions import BotoCoreError, ClientError 
+from urllib.parse import urlparse 
 
 # ---------- Env + clients ----------
 
 BEDROCK_REGION = os.getenv("BEDROCK_REGION", "us-west-2")
 bedrock_client = boto3.client("bedrock-runtime", region_name=BEDROCK_REGION)
-
+s3_client = boto3.client("s3", region_name=BEDROCK_REGION)
 USE_BEDROCK = os.getenv("USE_BEDROCK", "false").lower() == "true"
 USE_LUMA = os.getenv("USE_LUMA", "false").lower() == "true"
 
 CLAUDE_MODEL_ID = os.getenv(
     "CLAUDE_MODEL_ID",
-    "anthropic.claude-3-5-sonnet-20241022-v1:0",  
+    "arn:aws:bedrock:us-west-2:720229719097:inference-profile/global.anthropic.claude-sonnet-4-20250514-v1:0",
 )
 
 LUMA_MODEL_ID = os.getenv(
@@ -227,6 +228,30 @@ def _local_style_and_analysis(model_input: Dict[str, Any]) -> Dict[str, Any]:
 
 # ---------- 3. Claude (text model on Bedrock) ----------
 
+def _strip_markdown_fences(text: str) -> str:
+    """
+    Remove leading/trailing Markdown code fences like ```json ... ``` so we can parse JSON.
+    """
+    if not text:
+        return text
+
+    stripped = text.strip()
+
+    if stripped.startswith("```"):
+        lines = stripped.splitlines()
+
+        # Drop first line (``` or ```json)
+        if lines:
+            lines = lines[1:]
+
+        # Drop last line if it's a closing fence
+        if lines and lines[-1].strip().startswith("```"):
+            lines = lines[:-1]
+
+        stripped = "\n".join(lines).strip()
+
+    return stripped
+
 def call_claude_model(model_input: Dict[str, Any]) -> Dict[str, Any]:
     """
     Call a Claude model on Bedrock to generate:
@@ -235,8 +260,7 @@ def call_claude_model(model_input: Dict[str, Any]) -> Dict[str, Any]:
       - style_profile
       - psycho_metadata
 
-    Assumes the model returns a JSON object as text.
-    You may need to adapt parsing to the exact Bedrock response format.
+    The model is instructed to return a single JSON object as text.
     """
     system_prompt = """
 You are an assistant who acts as both:
@@ -275,15 +299,20 @@ Very important:
 
     user_json = json.dumps(model_input, ensure_ascii=False)
 
-    body = {
-        "modelId": CLAUDE_MODEL_ID,
-        "messages": [
+    # ✅ Anthropic Messages format for Bedrock:
+    # - top-level "system"
+    # - messages[] with only "user"/"assistant" roles
+    request_body = {
+        "anthropic_version": "bedrock-2023-05-31",
+        "max_tokens": 1200,
+        "temperature": 0.7,
+        "system": [
             {
-                "role": "system",
-                "content": [
-                    {"type": "text", "text": system_prompt},
-                ],
-            },
+                "type": "text",
+                "text": system_prompt,
+            }
+        ],
+        "messages": [
             {
                 "role": "user",
                 "content": [
@@ -296,35 +325,44 @@ Very important:
                         ),
                     }
                 ],
-            },
+            }
         ],
-        "inferenceConfig": {
-            "maxTokens": 1200,
-            "temperature": 0.7,
-        },
     }
 
     response = bedrock_client.invoke_model(
-        modelId=CLAUDE_MODEL_ID,
-        body=json.dumps(body),
+        modelId=CLAUDE_MODEL_ID,          # your inference profile ARN/ID
+        body=json.dumps(request_body),
         contentType="application/json",
         accept="application/json",
     )
 
-    response_body = json.loads(response["body"].read())
+    raw_body = response["body"].read()
+    response_body = json.loads(raw_body)
 
-    # The exact field depends on the model API.
-    # Adjust this according to Bedrock's Claude response schema.
-    model_text = response_body.get("outputText")
+    # Anthropic on Bedrock: assistant text is in content[].text
+    try:
+        content_blocks = response_body.get("content", [])
+        model_text = "".join(
+            block["text"] for block in content_blocks if block.get("type") == "text"
+        )
+    except Exception as e:
+        raise RuntimeError(f"Unexpected Claude response format: {response_body}") from e
+
     if not model_text:
-        results = response_body.get("results")
-        if isinstance(results, list) and results:
-            model_text = results[0].get("outputText")
+        raise RuntimeError(f"No text content returned from Claude: {response_body}")
 
-    if not model_text:
-        raise RuntimeError(f"Unexpected Claude response format: {response_body}")
+    # Some models still wrap output in ```json fences; strip them defensively
+    cleaned_text = _strip_markdown_fences(model_text)
 
-    return json.loads(model_text)
+    # Model is instructed to return a JSON object; parse it
+    try:
+        parsed = json.loads(cleaned_text)
+    except json.JSONDecodeError as e:
+        raise RuntimeError(f"Model did not return valid JSON: {cleaned_text}") from e
+
+    return parsed
+
+
 
 
 def call_model(model_input: Dict[str, Any]) -> Dict[str, Any]:
@@ -370,16 +408,13 @@ def call_luma_model(prompt: str, key_prefix: str) -> Optional[str]:
     - prompt: text prompt for the video
     - key_prefix: S3 prefix to keep outputs organized, e.g. "luma_outputs/<dream-id>"
 
-    Returns: S3 URI for the output folder (or None on failure / disabled).
+    Returns: S3 URI for the output video (or folder), or None on failure / disabled.
     """
     if not USE_LUMA:
-        print("USE_LUMA is false; skipping Luma video generation.")
+        print("[LUMA] USE_LUMA is false; skipping Luma video generation.")
         return None
 
-    # The docs say: outputDataConfig.s3OutputDataConfig.s3Uri
     s3_uri = f"s3://{LUMA_OUTPUT_BUCKET}/{key_prefix}"
-
-    # 1) StartAsyncInvoke
     model_input = {
         "prompt": prompt,
         "aspect_ratio": "16:9",
@@ -388,47 +423,108 @@ def call_luma_model(prompt: str, key_prefix: str) -> Optional[str]:
         "resolution": "720p",
     }
 
-    start_response = bedrock_client.start_async_invoke(
-        modelId=LUMA_MODEL_ID,
-        modelInput=model_input,
-        outputDataConfig={
-            "s3OutputDataConfig": {
-                "s3Uri": s3_uri,
-            }
-        },
-    )
+    try:
+        start_response = bedrock_client.start_async_invoke(
+            modelId=LUMA_MODEL_ID,
+            modelInput=model_input,
+            outputDataConfig={
+                "s3OutputDataConfig": {
+                    "s3Uri": s3_uri,
+                }
+            },
+        )
+    except ClientError as e:
+        code = e.response.get("Error", {}).get("Code")
+        print(f"[LUMA] start_async_invoke failed with {code}: {e}")
+        # If it's throttling or any other issue, just skip video instead of 500.
+        return None
+    except BotoCoreError as e:
+        print(f"[LUMA] start_async_invoke BotoCoreError: {e}")
+        return None
 
-    invoke_job_arn = start_response["invokeJobArn"]
-    print(f"Started Luma async job: {invoke_job_arn}")
+    invocation_arn = start_response.get("invocationArn")
+    if not invocation_arn:
+        print(f"[LUMA] Missing invocationArn in response: {start_response}")
+        return None
 
-    # 2) Poll GetAsyncInvoke until completion or timeout
+    print(f"[LUMA] Started async job: {invocation_arn}")
+
+    # ---- 2) Poll GetAsyncInvoke until completion or timeout ----
     max_wait_seconds = 300  # 5 minutes
     poll_interval = 10
     waited = 0
 
     while waited < max_wait_seconds:
-        job = bedrock_client.get_async_invoke(invokeJobArn=invoke_job_arn)
-        status = job["status"]
-        print(f"Luma job status: {status}")
+        try:
+            job = bedrock_client.get_async_invoke(invocationArn=invocation_arn)
+        except ClientError as e:
+            code = e.response.get("Error", {}).get("Code")
+            print(f"[LUMA] get_async_invoke failed with {code}: {e}")
+            # If throttled during polling, just bail gracefully.
+            return None
+        except BotoCoreError as e:
+            print(f"[LUMA] get_async_invoke BotoCoreError: {e}")
+            return None
+
+        status = job.get("status")
+        print(f"[LUMA] Job status: {status}")
 
         if status == "Completed":
-            # Video is now in S3 under s3_uri.
-            # For now we just return the folder URI; you can later
-            # list the exact .mp4 object if you want.
-            return s3_uri
+            output_cfg = job.get("outputDataConfig", {}).get("s3OutputDataConfig", {})
+            final_uri = output_cfg.get("s3Uri") or s3_uri
+            print(f"[LUMA] Video written to: {final_uri}")
+            return final_uri
 
         if status == "Failed":
-            print(f"Luma job failed: {job}")
+            print(f"[LUMA] Job failed: {job.get('failureMessage') or job}")
             return None
 
         time.sleep(poll_interval)
         waited += poll_interval
 
-    print("Luma job timed out.")
+    print("[LUMA] Job timed out.")
     return None
 
+def get_luma_video_url_from_folder(s3_folder_uri: str) -> Optional[str]:
+    """
+    Given an S3 folder URI like:
+      s3://bucket/luma_outputs/<dream-id>/<job-id>
+    list objects under that prefix, pick the first .mp4,
+    and return a presigned HTTPS URL.
+    """
+    if not s3_folder_uri:
+        return None
 
-# ---------- 5. Main entrypoint used by FastAPI ----------
+    parsed = urlparse(s3_folder_uri)
+    bucket = parsed.netloc
+    prefix = parsed.path.lstrip("/")
+
+    # List objects under the prefix
+    resp = s3_client.list_objects_v2(Bucket=bucket, Prefix=prefix)
+    contents = resp.get("Contents", [])
+    if not contents:
+        print("[LUMA] No objects found under prefix", prefix)
+        return None
+
+    # Try to find a video file
+    mp4_keys = [obj["Key"] for obj in contents if obj["Key"].endswith(".mp4")]
+    if mp4_keys:
+        key = mp4_keys[0]
+    else:
+        key = contents[0]["Key"]
+
+    print("[LUMA] Using key for playback:", key)
+
+    # Generate a presigned URL (1 hour)
+    url = s3_client.generate_presigned_url(
+        "get_object",
+        Params={"Bucket": bucket, "Key": key},
+        ExpiresIn=3600,
+    )
+    return url
+
+
+# ---------- 5.  FastAPI ----------
 
 def run_dream_inference(dream: Dream) -> DreamRenderResponse:
     """
@@ -462,16 +558,22 @@ def run_dream_inference(dream: Dream) -> DreamRenderResponse:
     # 3. Build Luma prompt
     luma_prompt = build_luma_prompt(movie_script, style_profile)
 
-    # 4. Call Luma (optional, depending on USE_LUMA)
     key_prefix = f"luma_outputs/{dream.id}"
-    video_uri = call_luma_model(luma_prompt, key_prefix)
+    s3_folder_uri = call_luma_model(luma_prompt, key_prefix)
 
-    # 5. Return combined response
+    presigned_video_url: Optional[str] = None
+    if s3_folder_uri:
+        presigned_video_url = get_luma_video_url_from_folder(s3_folder_uri)
+
+    print("[LUMA] Returning video URL to client:", presigned_video_url)
+
     return DreamRenderResponse(
         dream=dream,
         style_profile=style_profile,
         movie_script=movie_script,
         psychoanalysis=psychoanalysis,
         psycho_metadata=psycho_meta_obj,
-        video_url=video_uri,
+        video_url=presigned_video_url,
     )
+
+

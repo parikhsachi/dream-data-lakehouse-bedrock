@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import purpleFabric from "../images/bedrock-4.jpeg";
-import fairyBook from "../images/bedrock-10.jpeg";
+import fairyBook from "../images/bedrock-10.png";
+import creamPaper from "../images/creampaper.jpg";
+import scrapMoon from "../images/bedrock-12.jpeg";
+import scrapFlowers from "../images/bedrock-5.jpeg";
 
 type DreamCreate = {
   mood: number | "";
@@ -18,7 +21,7 @@ type DreamCreate = {
 };
 
 type JournalEntryPageProps = {
-  onDreamCreated?: (dreamId: string) => void; // we'll use this later to go to theater view
+  onDreamCreated?: (dreamId: string) => void;
 };
 
 const initialForm: DreamCreate = {
@@ -44,6 +47,13 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
   const [error, setError] = useState<string | null>(null);
   const [lastDreamId, setLastDreamId] = useState<string | null>(null);
 
+  const todayLabel = new Date().toLocaleDateString(undefined, {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
   function update<K extends keyof DreamCreate>(key: K, value: DreamCreate[K]) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
@@ -54,7 +64,6 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
     setError(null);
 
     try {
-      // Build payload, converting "" to null for numeric fields
       const payload = {
         ...form,
         mood: form.mood === "" ? null : Number(form.mood),
@@ -92,49 +101,85 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundImage: `
-          radial-gradient(circle at top, rgba(61,43,91,0.95) 0, rgba(7,3,20,0.98) 55%, #05030a 100%),
-          url(${purpleFabric})
-        `,
+        backgroundImage: `url(${purpleFabric})`, // full purple diary fabric
         backgroundSize: "cover",
         backgroundPosition: "center",
-        backgroundBlendMode: "soft-light",
         fontFamily: "var(--font-body)",
         color: "#f7f1ff",
         position: "relative",
         overflow: "hidden",
       }}
     >
-      <div style={{ position: "relative", maxWidth: "1100px", width: "100%" }}>
+      {/* twinkles across whole page */}
+      <div className="twinkle-layer" />
+
+      <div
+        style={{
+          position: "relative",
+          maxWidth: "1100px",
+          width: "100%",
+        }}
+      >
         {/* Fairy book sticker */}
         <img
           src={fairyBook}
           alt="Dream journal"
+          className="float-soft"
           style={{
             position: "absolute",
-            top: "-3.2rem",
+            top: "-3.4rem",
             left: "-1.5rem",
             width: "110px",
-            transform: "rotate(-8deg)",
             filter: "drop-shadow(0 14px 30px rgba(0,0,0,0.7))",
             pointerEvents: "none",
             zIndex: 5,
           }}
         />
 
+        {/* Scrap images for junk-journal feel */}
+        <img
+          src={scrapMoon}
+          alt=""
+          style={{
+            position: "absolute",
+            right: "-2.4rem",
+            top: "0.4rem",
+            width: "140px",
+            transform: "rotate(4deg)",
+            opacity: 0.92,
+            filter: "drop-shadow(0 12px 28px rgba(0,0,0,0.8))",
+            borderRadius: "8px",
+          }}
+        />
+        <img
+          src={scrapFlowers}
+          alt=""
+          style={{
+            position: "absolute",
+            left: "-2.1rem",
+            bottom: "-1.8rem",
+            width: "150px",
+            transform: "rotate(-5deg)",
+            opacity: 0.9,
+            filter: "drop-shadow(0 10px 24px rgba(0,0,0,0.85))",
+            borderRadius: "10px",
+          }}
+        />
+
+        {/* Main notebook */}
         <div
           style={{
             background:
-              "linear-gradient(135deg, rgba(40,25,68,0.95), rgba(19,11,38,0.98))",
-            borderRadius: "16px",
-            boxShadow: "0 18px 45px rgba(0,0,0,0.6)",
-            padding: "2rem 2.5rem",
-            border: "1px solid rgba(214, 180, 255, 0.35)",
+              "radial-gradient(circle at top, rgba(24,14,48,0.96) 0, rgba(10,5,26,0.98) 55%)",
+            borderRadius: "18px",
+            boxShadow: "0 20px 55px rgba(0,0,0,0.75)",
+            padding: "2.2rem 2.6rem 2.1rem",
+            border: "1px solid rgba(214, 180, 255, 0.4)",
           }}
         >
           <h1
             style={{
-              fontSize: "2.2rem",
+              fontSize: "2.4rem",
               marginBottom: "0.25rem",
               color: "#f5e0ff",
               fontFamily: "var(--font-script)",
@@ -159,17 +204,17 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
               style={{
                 display: "grid",
                 gridTemplateColumns: "1.1fr 1.5fr",
-                gap: "1.5rem",
+                gap: "1.7rem",
               }}
             >
-              {/* LEFT PAGE */}
+              {/* LEFT PAGE – day context */}
               <div
                 style={{
                   background:
-                    "linear-gradient(135deg, rgba(51,31,82,0.9), rgba(32,16,58,0.95))",
-                  borderRadius: "12px",
-                  padding: "1.25rem",
-                  border: "1px solid rgba(230,206,255,0.28)",
+                    "radial-gradient(circle at top, rgba(80,52,120,0.95) 0, rgba(30,18,64,0.98) 60%)",
+                  borderRadius: "14px",
+                  padding: "1.3rem",
+                  border: "1px solid rgba(230,206,255,0.4)",
                   position: "relative",
                   overflow: "hidden",
                 }}
@@ -180,15 +225,15 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                     inset: 0,
                     pointerEvents: "none",
                     backgroundImage:
-                      "radial-gradient(circle at 0 0, rgba(255,255,255,0.06), transparent 55%), radial-gradient(circle at 100% 100%, rgba(255,255,255,0.04), transparent 55%)",
-                    opacity: 0.7,
+                      "radial-gradient(circle at 0 0, rgba(255,255,255,0.06) 0, transparent 55%), radial-gradient(circle at 100% 100%, rgba(255,255,255,0.04) 0, transparent 55%)",
+                    opacity: 0.85,
                   }}
                 />
                 <div style={{ position: "relative", zIndex: 1 }}>
                   <h2
                     style={{
-                      fontSize: "1.1rem",
-                      marginBottom: "0.75rem",
+                      fontSize: "1.05rem",
+                      marginBottom: "0.7rem",
                       color: "#f3ddff",
                       textTransform: "uppercase",
                       letterSpacing: "0.12em",
@@ -196,59 +241,82 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                       paddingBottom: "0.5rem",
                     }}
                   >
-                    Today&apos;s Atmosphere
+                    Today&apos;s atmosphere
                   </h2>
 
-                  {/* Mood + Sleep */}
+                  {/* Mood + Sleep (gold sliders) */}
                   <div style={{ display: "flex", gap: "0.75rem" }}>
                     <div style={{ flex: 1 }}>
                       <label
-                        style={{ fontSize: "0.8rem", color: "#d8c7f0" }}
+                        style={{
+                          fontSize: "0.8rem",
+                          color: "#d8c7f0",
+                          display: "block",
+                          marginBottom: "0.2rem",
+                        }}
                       >
-                        Mood (1 to 10)
+                        Mood (1–5)
                       </label>
                       <input
-                        type="number"
-                        min={-3}
-                        max={3}
-                        value={form.mood}
+                        type="range"
+                        min={1}
+                        max={5}
+                        className="gold-slider"
+                        value={form.mood === "" ? 3 : form.mood}
                         onChange={(e) =>
                           update(
                             "mood",
-                            e.target.value === ""
-                              ? ""
-                              : Number(e.target.value)
+                            e.target.value === "" ? "" : Number(e.target.value)
                           )
                         }
-                        style={inputStyle}
                       />
                     </div>
                     <div style={{ flex: 1 }}>
                       <label
-                        style={{ fontSize: "0.8rem", color: "#d8c7f0" }}
+                        style={{
+                          fontSize: "0.8rem",
+                          color: "#d8c7f0",
+                          display: "block",
+                          marginBottom: "0.2rem",
+                        }}
                       >
                         Sleep quality (1–5)
                       </label>
                       <input
-                        type="number"
+                        type="range"
                         min={1}
                         max={5}
-                        value={form.sleep_quality}
+                        className="gold-slider"
+                        value={
+                          form.sleep_quality === "" ? 3 : form.sleep_quality
+                        }
                         onChange={(e) =>
                           update(
                             "sleep_quality",
-                            e.target.value === ""
-                              ? ""
-                              : Number(e.target.value)
+                            e.target.value === "" ? "" : Number(e.target.value)
                           )
                         }
-                        style={inputStyle}
                       />
                     </div>
                   </div>
 
+                  {/* little divider glyph */}
+                  <div
+                    style={{
+                      margin: "0.9rem 0 0.65rem",
+                      textAlign: "center",
+                      fontSize: "0.7rem",
+                      letterSpacing: "0.35em",
+                      textTransform: "uppercase",
+                      color: "#cbb6ea",
+                      opacity: 0.9,
+                    }}
+                  >
+                    ✶ ✶ ✶
+                  </div>
+
                   {/* MBTI */}
-                  <div style={{ marginTop: "0.75rem" }}>
+                  <div style={{ marginTop: "0.4rem" }}>
                     <label
                       style={{ fontSize: "0.8rem", color: "#d8c7f0" }}
                     >
@@ -259,48 +327,6 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                       placeholder="e.g. INFJ"
                       value={form.mbti}
                       onChange={(e) => update("mbti", e.target.value)}
-                      style={inputStyle}
-                    />
-                  </div>
-
-                  {/* Links */}
-                  <div style={{ marginTop: "0.75rem" }}>
-                    <label
-                      style={{ fontSize: "0.8rem", color: "#d8c7f0" }}
-                    >
-                      Spotify link
-                    </label>
-                    <input
-                      type="url"
-                      placeholder="profile or playlist"
-                      value={form.spotify_url}
-                      onChange={(e) => update("spotify_url", e.target.value)}
-                      style={inputStyle}
-                    />
-                  </div>
-                  <div style={{ marginTop: "0.5rem" }}>
-                    <label
-                      style={{ fontSize: "0.8rem", color: "#d8c7f0" }}
-                    >
-                      Letterboxd link
-                    </label>
-                    <input
-                      type="url"
-                      value={form.letterboxd_url}
-                      onChange={(e) => update("letterboxd_url", e.target.value)}
-                      style={inputStyle}
-                    />
-                  </div>
-                  <div style={{ marginTop: "0.5rem" }}>
-                    <label
-                      style={{ fontSize: "0.8rem", color: "#d8c7f0" }}
-                    >
-                      Goodreads link
-                    </label>
-                    <input
-                      type="url"
-                      value={form.goodreads_url}
-                      onChange={(e) => update("goodreads_url", e.target.value)}
                       style={inputStyle}
                     />
                   </div>
@@ -316,9 +342,7 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                       type="text"
                       placeholder="playlist / album / artist"
                       value={form.listening_to}
-                      onChange={(e) =>
-                        update("listening_to", e.target.value)
-                      }
+                      onChange={(e) => update("listening_to", e.target.value)}
                       style={inputStyle}
                     />
                   </div>
@@ -374,94 +398,99 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                 </div>
               </div>
 
-              {/* RIGHT PAGE */}
+              {/* RIGHT PAGE – cream journal with gold ruled lines */}
               <div
                 style={{
-                  background: "linear-gradient(135deg, #fdf6ff, #f5ecff)",
-                  borderRadius: "12px",
+                  borderRadius: "14px",
                   padding: "1.25rem",
-                  border: "1px solid rgba(115,74,145,0.4)",
-                  boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.4)",
+                  border: "1px solid rgba(115,74,145,0.45)",
                   color: "#3b244d",
                   position: "relative",
                   overflow: "hidden",
+                  backgroundImage: `url(${creamPaper})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
                 }}
               >
-                {/* Ruled paper lines */}
+                {/* gold ruled lines */}
                 <div
                   style={{
                     position: "absolute",
-                    inset: "0.8rem 0.8rem",
+                    inset: "1rem 1rem",
                     backgroundImage:
-                      "repeating-linear-gradient(to bottom, rgba(150,120,190,0.32) 0, rgba(150,120,190,0.32) 1px, transparent 1px, transparent 21px)",
+                      "repeating-linear-gradient(to bottom, rgba(210,175,100,0.7) 0, rgba(210,175,100,0.7) 1px, transparent 1px, transparent 22px)",
                     opacity: 0.7,
                     pointerEvents: "none",
                   }}
                 />
                 <div style={{ position: "relative", zIndex: 1 }}>
-                  <h2
+                  {/* Date + small tag */}
+                  <div
                     style={{
-                      fontSize: "1.1rem",
-                      marginBottom: "0.75rem",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.12em",
-                      color: "#6b3c8b",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "baseline",
+                      marginBottom: "0.6rem",
                     }}
                   >
-                    Dream Entry
-                  </h2>
-
-                  <div style={{ marginBottom: "0.75rem" }}>
-                    <label
+                    <span
                       style={{
-                        fontSize: "0.8rem",
-                        color: "#7c5c9a",
+                        fontFamily: "var(--font-script)",
+                        fontSize: "1.9rem",
+                        color: "#6b3c8b",
                       }}
                     >
-                      Title
-                    </label>
+                      {todayLabel}
+                    </span>
+                    <span
+                      style={{
+                        fontSize: "0.7rem",
+                        letterSpacing: "0.28em",
+                        textTransform: "uppercase",
+                        color: "#9b7ba7",
+                      }}
+                    >
+                      dream entry
+                    </span>
+                  </div>
+
+                  {/* Optional title, no label */}
+                  <div style={{ marginBottom: "0.7rem" }}>
                     <input
                       type="text"
-                      placeholder="optional"
+                      placeholder="title (optional)"
                       value={form.title}
                       onChange={(e) => update("title", e.target.value)}
                       style={{
                         width: "100%",
-                        padding: "0.4rem 0.5rem",
+                        padding: "0.35rem 0.6rem",
                         borderRadius: "6px",
                         border: "1px solid rgba(136,102,164,0.7)",
-                        background: "rgba(255,255,255,0.85)",
+                        background: "rgba(255,255,255,0.9)",
                         fontSize: "0.9rem",
+                        fontFamily: "var(--font-body)",
                       }}
                     />
                   </div>
 
+                  {/* Narrative */}
                   <div>
-                    <label
-                      style={{
-                        fontSize: "0.8rem",
-                        color: "#7c5c9a",
-                      }}
-                    >
-                      Dream narrative
-                    </label>
                     <textarea
                       required
                       placeholder="Write your dream here as if it were a scene..."
                       value={form.narrative}
-                      onChange={(e) =>
-                        update("narrative", e.target.value)
-                      }
+                      onChange={(e) => update("narrative", e.target.value)}
                       style={{
                         width: "100%",
-                        padding: "0.6rem 0.7rem",
-                        borderRadius: "6px",
+                        padding: "0.75rem 0.8rem",
+                        borderRadius: "8px",
                         border: "1px solid rgba(136,102,164,0.7)",
-                        background: "rgba(255,255,255,0.65)",
+                        background: "rgba(255,255,255,0.85)",
                         minHeight: "260px",
                         resize: "vertical",
-                        fontSize: "0.95rem",
-                        lineHeight: "1.5",
+                        fontSize: "0.96rem",
+                        lineHeight: "1.6",
+                        fontFamily: "var(--font-body)",
                       }}
                     />
                   </div>
@@ -501,26 +530,24 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
               <button
                 type="submit"
                 disabled={isSaving}
+                className="gold-button-twinkle"
                 style={{
-                  padding: "0.7rem 1.7rem",
+                  padding: "0.8rem 2rem",
                   borderRadius: "999px",
-                  border: "1px solid rgba(247,228,171,0.9)",
-                  background:
-                    "linear-gradient(135deg, #f7dd91, #e3b571)",
-                  color: "#3b244d",
+                  color: "#2a163d",
                   fontWeight: 600,
-                  letterSpacing: "0.08em",
+                  letterSpacing: "0.12em",
                   textTransform: "uppercase",
-                  fontSize: "0.85rem",
+                  fontSize: "0.82rem",
                   cursor: isSaving ? "wait" : "pointer",
-                  boxShadow: "0 10px 25px rgba(0,0,0,0.45)",
                   transform: isSaving ? "translateY(1px)" : "translateY(0)",
-                  opacity: isSaving ? 0.85 : 1,
+                  opacity: isSaving ? 0.88 : 1,
                   transition:
                     "transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease",
+                  textShadow: "0 0 4px rgba(255,255,255,0.6)",
                 }}
               >
-                {isSaving ? "Saving..." : "Generate Dream Film"}
+                {isSaving ? "Summoning..." : "Generate Dream Film"}
               </button>
             </div>
 

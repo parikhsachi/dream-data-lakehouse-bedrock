@@ -9,7 +9,6 @@ import pyarrow as pa
 import pyarrow.parquet as pq
 
 
-# S3 paths
 BUCKET = os.getenv("DREAM_LAKE_BUCKET", "dream-film-lake-dev-sachi")
 RAW_PREFIX = "raw/dream_journal_events/"
 STRUCTURED_PREFIX = "structured/dreams_parquet/v1/"
@@ -51,15 +50,6 @@ def read_json_from_s3(key: str) -> Dict[str, Any]:
 
 
 def extract_row(event: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Normalize one raw event JSON into a flat row.
-
-    We assume it either has:
-      - top-level dream fields, OR
-      - nested 'dream' + 'render' structure.
-
-    Adjust field names here if your raw JSON structure differs.
-    """
     dream = event.get("dream") or event
     render = event.get("render") or event.get("render_result") or {}
 

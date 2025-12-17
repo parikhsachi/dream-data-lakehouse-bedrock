@@ -169,8 +169,9 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
         {/* Main notebook */}
         <div
           style={{
-            background:
-              "radial-gradient(circle at top, rgba(24,14,48,0.96) 0, rgba(10,5,26,0.98) 55%)",
+            backgroundImage: `url(${creamPaper})`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
             borderRadius: "18px",
             boxShadow: "0 20px 55px rgba(0,0,0,0.75)",
             padding: "2.2rem 2.6rem 2.1rem",
@@ -407,9 +408,6 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                   color: "#3b244d",
                   position: "relative",
                   overflow: "hidden",
-                  backgroundImage: `url(${creamPaper})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
                 }}
               >
                 {/* gold ruled lines */}

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import purpleFabric from "../images/bedrock-4.jpeg";
 import fairyBook from "../images/bedrock-10.png";
-import creamPaper from "../images/creampaper.jpg";
+import creamPaper from "../images/creampaper.png";
 import scrapMoon from "../images/bedrock-12.jpeg";
 import scrapFlowers from "../images/bedrock-5.jpeg";
 
@@ -10,9 +10,13 @@ type DreamCreate = {
   sleep_quality: number | "";
   context_note: string;
   mbti: string;
+
+  // keeping these in the type so backend stays compatible,
+  // but you can remove their UI inputs later.
   spotify_url: string;
   letterboxd_url: string;
   goodreads_url: string;
+
   listening_to: string;
   watching: string;
   reading: string;
@@ -67,8 +71,7 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
       const payload = {
         ...form,
         mood: form.mood === "" ? null : Number(form.mood),
-        sleep_quality:
-          form.sleep_quality === "" ? null : Number(form.sleep_quality),
+        sleep_quality: form.sleep_quality === "" ? null : Number(form.sleep_quality),
       };
 
       const res = await fetch("http://127.0.0.1:8000/dreams", {
@@ -97,385 +100,345 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
     <div
       style={{
         minHeight: "100vh",
-        padding: "2rem",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        backgroundImage: `url(${purpleFabric})`, // full purple diary fabric
+        backgroundImage: `url(${purpleFabric})`,
         backgroundSize: "cover",
         backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
         fontFamily: "var(--font-body)",
         color: "#f7f1ff",
         position: "relative",
         overflow: "hidden",
       }}
     >
-      {/* twinkles across whole page */}
-      <div className="twinkle-layer" />
+      {/* OPTIONAL: twinkle overlay if you already have it in CSS */}
+      <div
+        className="twinkle-layer"
+        style={{
+          position: "absolute",
+          inset: 0,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
 
       <div
         style={{
           position: "relative",
-          maxWidth: "1100px",
-          width: "100%",
+          width: "calc(100% - 4rem)", // 2rem margin on each side
+          maxWidth: "1250px",
+          zIndex: 1,
         }}
       >
-        {/* Fairy book sticker */}
+
+        {/* MAIN NOTEBOOK (paper fills the whole object) */}
+        <div
+          style={{
+            position: "relative",
+            borderRadius: "22px",
+          }}
+        >
+          {/* Paper background layer (oversized to hide transparent PNG border) */}
+          <div
+            style={{
+              position: "absolute",
+              inset: "-22px",
+              backgroundImage: `url(${creamPaper})`,
+              opacity:0.9,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              zIndex: 0,
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              inset: 0,
+              pointerEvents: "none",
+              zIndex: 0,
+            }}
+          />
+
+          <div
+            style={{
+              position: "relative",
+              zIndex: 1,
+              padding: "2.2rem 2.6rem 2.1rem",
+            }}
+          >
+                    {/* Fairy book sticker */}
         <img
           src={fairyBook}
           alt="Dream journal"
           className="float-soft"
           style={{
             position: "absolute",
-            top: "-3.4rem",
-            left: "-1.5rem",
-            width: "110px",
-            filter: "drop-shadow(0 14px 30px rgba(0,0,0,0.7))",
+            width: "120px",
+            filter: "drop-shadow(0 14px 30px rgba(0,0,0,0.75))",
             pointerEvents: "none",
-            zIndex: 5,
+            zIndex: 7,
           }}
         />
-
-        {/* Scrap images for junk-journal feel */}
-        <img
-          src={scrapMoon}
-          alt=""
-          style={{
-            position: "absolute",
-            right: "-2.4rem",
-            top: "0.4rem",
-            width: "140px",
-            transform: "rotate(4deg)",
-            opacity: 0.92,
-            filter: "drop-shadow(0 12px 28px rgba(0,0,0,0.8))",
-            borderRadius: "8px",
-          }}
-        />
-        <img
-          src={scrapFlowers}
-          alt=""
-          style={{
-            position: "absolute",
-            left: "-2.1rem",
-            bottom: "-1.8rem",
-            width: "150px",
-            transform: "rotate(-5deg)",
-            opacity: 0.9,
-            filter: "drop-shadow(0 10px 24px rgba(0,0,0,0.85))",
-            borderRadius: "10px",
-          }}
-        />
-
-        {/* Main notebook */}
-        <div
-          style={{
-            backgroundImage: `url(${creamPaper})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            borderRadius: "18px",
-            boxShadow: "0 20px 55px rgba(0,0,0,0.75)",
-            padding: "2.2rem 2.6rem 2.1rem",
-            border: "1px solid rgba(214, 180, 255, 0.4)",
-          }}
-        >
-          <h1
-            style={{
-              fontSize: "2.4rem",
-              marginBottom: "0.25rem",
-              color: "#f5e0ff",
-              fontFamily: "var(--font-script)",
-              letterSpacing: "0.06em",
-            }}
-          >
-            Dream Journal
-          </h1>
-          <p
-            style={{
-              marginBottom: "1.5rem",
-              fontSize: "0.95rem",
-              color: "#d8c7f0",
-            }}
-          >
-            Left page: your day. Right page: your dream. When you&apos;re ready,
-            we turn it into a film.
-          </p>
-
-          <form onSubmit={handleSubmit}>
-            <div
+            <h1
               style={{
-                display: "grid",
-                gridTemplateColumns: "1.1fr 1.5fr",
-                gap: "1.7rem",
+                fontSize: "3rem",
+                marginLeft: "9rem",
+                color: "antiquewhite",
+                fontFamily: "var(--font-script)",
+                textShadow: "0 0 18px rgba(10,0,18,0.65)",
+                opacity: 0,
               }}
             >
-              {/* LEFT PAGE – day context */}
+              Dream Journal
+            </h1>
+
+            <p
+              style={{
+                marginBottom: "1.5rem",
+                fontSize: "0.95rem",
+                color: "#ead9ff",
+                opacity: 0,
+              }}
+            >
+              Left page: your day. Right page: your dream. When you&apos;re ready,
+              we turn it into a film.
+            </p>
+
+            <form onSubmit={handleSubmit}>
               <div
                 style={{
-                  background:
-                    "radial-gradient(circle at top, rgba(80,52,120,0.95) 0, rgba(30,18,64,0.98) 60%)",
-                  borderRadius: "14px",
-                  padding: "1.3rem",
-                  border: "1px solid rgba(230,206,255,0.4)",
-                  position: "relative",
-                  overflow: "hidden",
+                  display: "grid",
+                  gridTemplateColumns: "1.05fr 1.55fr",
+                  gap: "1.7rem",
+                  alignItems: "start",
                 }}
               >
+                {/* LEFT PAGE */}
                 <div
                   style={{
-                    position: "absolute",
-                    inset: 0,
-                    pointerEvents: "none",
-                    backgroundImage:
-                      "radial-gradient(circle at 0 0, rgba(255,255,255,0.06) 0, transparent 55%), radial-gradient(circle at 100% 100%, rgba(255,255,255,0.04) 0, transparent 55%)",
-                    opacity: 0.85,
+                    background:
+                      "radial-gradient(circle at top, rgba(80,52,120,0.94) 0, rgba(30,18,64,0.98) 60%)",
+                    borderRadius: "14px",
+                    padding: "1.3rem",
+                    border: "1px solid rgba(230,206,255,0.35)",
+                    position: "relative",
+                    overflow: "hidden",
                   }}
-                />
-                <div style={{ position: "relative", zIndex: 1 }}>
-                  <h2
-                    style={{
-                      fontSize: "1.05rem",
-                      marginBottom: "0.7rem",
-                      color: "#f3ddff",
-                      textTransform: "uppercase",
-                      letterSpacing: "0.12em",
-                      borderBottom: "1px solid rgba(245,224,255,0.35)",
-                      paddingBottom: "0.5rem",
-                    }}
-                  >
-                    Today&apos;s atmosphere
-                  </h2>
-
-                  {/* Mood + Sleep (gold sliders) */}
-                  <div style={{ display: "flex", gap: "0.75rem" }}>
-                    <div style={{ flex: 1 }}>
-                      <label
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "#d8c7f0",
-                          display: "block",
-                          marginBottom: "0.2rem",
-                        }}
-                      >
-                        Mood (1–5)
-                      </label>
-                      <input
-                        type="range"
-                        min={1}
-                        max={5}
-                        className="gold-slider"
-                        value={form.mood === "" ? 3 : form.mood}
-                        onChange={(e) =>
-                          update(
-                            "mood",
-                            e.target.value === "" ? "" : Number(e.target.value)
-                          )
-                        }
-                      />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <label
-                        style={{
-                          fontSize: "0.8rem",
-                          color: "#d8c7f0",
-                          display: "block",
-                          marginBottom: "0.2rem",
-                        }}
-                      >
-                        Sleep quality (1–5)
-                      </label>
-                      <input
-                        type="range"
-                        min={1}
-                        max={5}
-                        className="gold-slider"
-                        value={
-                          form.sleep_quality === "" ? 3 : form.sleep_quality
-                        }
-                        onChange={(e) =>
-                          update(
-                            "sleep_quality",
-                            e.target.value === "" ? "" : Number(e.target.value)
-                          )
-                        }
-                      />
-                    </div>
-                  </div>
-
-                  {/* little divider glyph */}
+                >
                   <div
                     style={{
-                      margin: "0.9rem 0 0.65rem",
-                      textAlign: "center",
-                      fontSize: "0.7rem",
-                      letterSpacing: "0.35em",
-                      textTransform: "uppercase",
-                      color: "#cbb6ea",
+                      position: "absolute",
+                      inset: 0,
+                      pointerEvents: "none",
+                      backgroundImage:
+                        "radial-gradient(circle at 0 0, rgba(255,255,255,0.06) 0, transparent 55%), radial-gradient(circle at 100% 100%, rgba(255,255,255,0.04) 0, transparent 55%)",
                       opacity: 0.9,
                     }}
-                  >
-                    ✶ ✶ ✶
-                  </div>
+                  />
 
-                  {/* MBTI */}
-                  <div style={{ marginTop: "0.4rem" }}>
-                    <label
-                      style={{ fontSize: "0.8rem", color: "#d8c7f0" }}
-                    >
-                      MBTI
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="e.g. INFJ"
-                      value={form.mbti}
-                      onChange={(e) => update("mbti", e.target.value)}
-                      style={inputStyle}
-                    />
-                  </div>
-
-                  {/* What you're consuming */}
-                  <div style={{ marginTop: "0.75rem" }}>
-                    <label
-                      style={{ fontSize: "0.8rem", color: "#d8c7f0" }}
-                    >
-                      Listening to
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="playlist / album / artist"
-                      value={form.listening_to}
-                      onChange={(e) => update("listening_to", e.target.value)}
-                      style={inputStyle}
-                    />
-                  </div>
-                  <div style={{ marginTop: "0.5rem" }}>
-                    <label
-                      style={{ fontSize: "0.8rem", color: "#d8c7f0" }}
-                    >
-                      Watching
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="film / show"
-                      value={form.watching}
-                      onChange={(e) => update("watching", e.target.value)}
-                      style={inputStyle}
-                    />
-                  </div>
-                  <div style={{ marginTop: "0.5rem" }}>
-                    <label
-                      style={{ fontSize: "0.8rem", color: "#d8c7f0" }}
-                    >
-                      Reading
-                    </label>
-                    <input
-                      type="text"
-                      placeholder="book / essay"
-                      value={form.reading}
-                      onChange={(e) => update("reading", e.target.value)}
-                      style={inputStyle}
-                    />
-                  </div>
-
-                  {/* Context note */}
-                  <div style={{ marginTop: "0.75rem" }}>
-                    <label
-                      style={{ fontSize: "0.8rem", color: "#d8c7f0" }}
-                    >
-                      Context note
-                    </label>
-                    <textarea
-                      placeholder="Anything else about your day..."
-                      value={form.context_note}
-                      onChange={(e) =>
-                        update("context_note", e.target.value)
-                      }
+                  <div style={{ position: "relative", zIndex: 1 }}>
+                    <h2
                       style={{
-                        ...inputStyle,
-                        minHeight: "70px",
-                        resize: "vertical",
+                        fontSize: "1.05rem",
+                        marginBottom: "0.7rem",
+                        color: "#f3ddff",
+                        textTransform: "uppercase",
+                        letterSpacing: "0.12em",
+                        borderBottom: "1px solid rgba(245,224,255,0.35)",
+                        paddingBottom: "0.5rem",
                       }}
-                    />
+                    >
+                      Today&apos;s atmosphere
+                    </h2>
+
+                    {/* Mood + Sleep */}
+                    <div style={{ display: "flex", gap: "0.85rem" }}>
+                      <div style={{ flex: 1 }}>
+                        <label
+                          style={{
+                            fontSize: "0.8rem",
+                            color: "#ead9ff",
+                            display: "block",
+                            marginBottom: "0.2rem",
+                          }}
+                        >
+                          Mood (1–5)
+                        </label>
+                        <input
+                          type="range"
+                          min={1}
+                          max={5}
+                          className="gold-slider"
+                          value={form.mood === "" ? 3 : form.mood}
+                          onChange={(e) =>
+                            update("mood", Number(e.target.value))
+                          }
+                        />
+                      </div>
+
+                      <div style={{ flex: 1 }}>
+                        <label
+                          style={{
+                            fontSize: "0.8rem",
+                            color: "#ead9ff",
+                            display: "block",
+                            marginBottom: "0.2rem",
+                          }}
+                        >
+                          Sleep (1–5)
+                        </label>
+                        <input
+                          type="range"
+                          min={1}
+                          max={5}
+                          className="gold-slider"
+                          value={form.sleep_quality === "" ? 3 : form.sleep_quality}
+                          onChange={(e) =>
+                            update("sleep_quality", Number(e.target.value))
+                          }
+                        />
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        margin: "0.9rem 0 0.65rem",
+                        textAlign: "center",
+                        fontSize: "0.7rem",
+                        letterSpacing: "0.35em",
+                        textTransform: "uppercase",
+                        color: "#e9d7ff",
+                        opacity: 0.9,
+                      }}
+                    >
+                      ✶ ✶ ✶
+                    </div>
+
+                    <div style={{ marginTop: "0.4rem" }}>
+                      <label style={{ fontSize: "0.8rem", color: "#ead9ff" }}>
+                        MBTI
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. INFJ"
+                        value={form.mbti}
+                        onChange={(e) => update("mbti", e.target.value)}
+                        style={inputStyle}
+                      />
+                    </div>
+
+                    <div style={{ marginTop: "0.75rem" }}>
+                      <label style={{ fontSize: "0.8rem", color: "#ead9ff" }}>
+                        Listening to
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="playlist / album / artist"
+                        value={form.listening_to}
+                        onChange={(e) => update("listening_to", e.target.value)}
+                        style={inputStyle}
+                      />
+                    </div>
+
+                    <div style={{ marginTop: "0.5rem" }}>
+                      <label style={{ fontSize: "0.8rem", color: "#ead9ff" }}>
+                        Watching
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="film / show"
+                        value={form.watching}
+                        onChange={(e) => update("watching", e.target.value)}
+                        style={inputStyle}
+                      />
+                    </div>
+
+                    <div style={{ marginTop: "0.5rem" }}>
+                      <label style={{ fontSize: "0.8rem", color: "#ead9ff" }}>
+                        Reading
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="book / essay"
+                        value={form.reading}
+                        onChange={(e) => update("reading", e.target.value)}
+                        style={inputStyle}
+                      />
+                    </div>
+
+                    <div style={{ marginTop: "0.75rem" }}>
+                      <label style={{ fontSize: "0.8rem", color: "#ead9ff" }}>
+                        Context note
+                      </label>
+                      <textarea
+                        placeholder="Anything else about your day..."
+                        value={form.context_note}
+                        onChange={(e) => update("context_note", e.target.value)}
+                        style={{
+                          ...inputStyle,
+                          minHeight: "80px",
+                          resize: "vertical",
+                        }}
+                      />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* RIGHT PAGE – cream journal with gold ruled lines */}
-              <div
-                style={{
-                  borderRadius: "14px",
-                  padding: "1.25rem",
-                  border: "1px solid rgba(115,74,145,0.45)",
-                  color: "#3b244d",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                {/* gold ruled lines */}
+                {/* RIGHT PAGE */}
                 <div
                   style={{
-                    position: "absolute",
-                    inset: "1rem 1rem",
-                    backgroundImage:
-                      "repeating-linear-gradient(to bottom, rgba(210,175,100,0.7) 0, rgba(210,175,100,0.7) 1px, transparent 1px, transparent 22px)",
-                    opacity: 0.7,
-                    pointerEvents: "none",
+                    borderRadius: "14px",
+                    padding: "1.25rem",
+                    border: "1px solid rgba(115,74,145,0.45)",
+                    color: "#2c1a3b",
+                    position: "relative",
+                    overflow: "hidden",
+                    backgroundImage: `url(${scrapFlowers})`,
                   }}
-                />
-                <div style={{ position: "relative", zIndex: 1 }}>
-                  {/* Date + small tag */}
-                  <div
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "baseline",
-                      marginBottom: "0.6rem",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontFamily: "var(--font-script)",
-                        fontSize: "1.9rem",
-                        color: "#6b3c8b",
-                      }}
-                    >
-                      {todayLabel}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: "0.7rem",
-                        letterSpacing: "0.28em",
-                        textTransform: "uppercase",
-                        color: "#9b7ba7",
-                      }}
-                    >
-                      dream entry
-                    </span>
-                  </div>
+                >
 
-                  {/* Optional title, no label */}
-                  <div style={{ marginBottom: "0.7rem" }}>
-                    <input
-                      type="text"
-                      placeholder="title (optional)"
-                      value={form.title}
-                      onChange={(e) => update("title", e.target.value)}
+                  <div style={{ position: "relative", zIndex: 1 }}>
+                    <div
                       style={{
-                        width: "100%",
-                        padding: "0.35rem 0.6rem",
-                        borderRadius: "6px",
-                        border: "1px solid rgba(136,102,164,0.7)",
-                        background: "rgba(255,255,255,0.9)",
-                        fontSize: "0.9rem",
-                        fontFamily: "var(--font-body)",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "baseline",
+                        marginBottom: "0.6rem",
+                      }}
+                    >
+                      <span
+                        style={{
+                          fontFamily: "var(--font-script)",
+                          fontSize: "1.9rem",
+                          color: "#5c2a7c",
+                          background: "antiquewhite",
+                          padding: "0.1rem 1.4rem",
+                          borderRadius: "6px",
+                          boxShadow:
+                            "0 0 12px rgba(255,255,255,0.5), inset 0 0 8px rgba(0,0,0,0.15)",
+                        }}
+                      >
+                        {todayLabel}
+                      </span>
+                    </div>
+                    <div
+                      style={{
+                        position: "absolute",
+                        inset: "2.4rem 0.4rem 0.1rem 0.8rem", // match textarea padding
+                        backgroundImage:
+                          "repeating-linear-gradient(to bottom, rgba(210,175,100,0.75) 0, rgba(210,175,100,0.75) 1px, transparent 1px, transparent 24px)",
+                        pointerEvents: "none",
+                        opacity: 1,
+                        zIndex: 0,
                       }}
                     />
-                  </div>
-
-                  {/* Narrative */}
-                  <div>
+                    <div>
                     <textarea
                       required
-                      placeholder="Write your dream here as if it were a scene..."
+                      placeholder="Write your dream here..."
                       value={form.narrative}
                       onChange={(e) => update("narrative", e.target.value)}
                       style={{
@@ -483,84 +446,88 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                         padding: "0.75rem 0.8rem",
                         borderRadius: "8px",
                         border: "1px solid rgba(136,102,164,0.7)",
-                        background: "rgba(255,255,255,0.85)",
-                        minHeight: "260px",
+                        minHeight: "300px",
                         resize: "vertical",
+                        background: 0.1,
                         fontSize: "0.96rem",
-                        lineHeight: "1.6",
+                        lineHeight: "1.65",
                         fontFamily: "var(--font-body)",
+                        outline: "none",
                       }}
                     />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+                      {/* Scrap images for junk-journal feel */}
 
-            {/* Footer / Generate button */}
-            <div
-              style={{
-                marginTop: "1.4rem",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                gap: "1rem",
-              }}
-            >
-              <div style={{ fontSize: "0.8rem", color: "#cbb6ea" }}>
-                {lastDreamId && (
-                  <span>
-                    Saved entry ID:{" "}
-                    <code
-                      style={{
-                        fontSize: "0.78rem",
-                        background: "rgba(0,0,0,0.25)",
-                        padding: "0.05rem 0.35rem",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      {lastDreamId}
-                    </code>{" "}
-                    – next, we&apos;ll project it as a film.
-                  </span>
-                )}
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSaving}
-                className="gold-button-twinkle"
-                style={{
-                  padding: "0.8rem 2rem",
-                  borderRadius: "999px",
-                  color: "#2a163d",
-                  fontWeight: 600,
-                  letterSpacing: "0.12em",
-                  textTransform: "uppercase",
-                  fontSize: "0.82rem",
-                  cursor: isSaving ? "wait" : "pointer",
-                  transform: isSaving ? "translateY(1px)" : "translateY(0)",
-                  opacity: isSaving ? 0.88 : 1,
-                  transition:
-                    "transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease",
-                  textShadow: "0 0 4px rgba(255,255,255,0.6)",
-                }}
-              >
-                {isSaving ? "Summoning..." : "Generate Dream Film"}
-              </button>
-            </div>
-
-            {error && (
+              {/* Footer */}
               <div
                 style={{
-                  marginTop: "0.75rem",
-                  fontSize: "0.8rem",
-                  color: "#ffb3c1",
+                  marginTop: "1.4rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "1rem",
                 }}
               >
-                {error}
+                <div style={{ fontSize: "0.82rem", color: "#ead9ff" }}>
+                  {lastDreamId && (
+                    <span>
+                      Saved entry ID:{" "}
+                      <code
+                        style={{
+                          fontSize: "0.78rem",
+                          background: "rgba(0,0,0,0.25)",
+                          padding: "0.05rem 0.35rem",
+                          borderRadius: "4px",
+                        }}
+                      >
+                        {lastDreamId}
+                      </code>{" "}
+                      – next, we&apos;ll project it as a film.
+                    </span>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="gold-button-twinkle"
+                  style={{
+                    padding: "0.85rem 2.1rem",
+                    borderRadius: "999px",
+                    backgroundImage: `url(${scrapFlowers})`,
+                    fontWeight: 700,
+                    letterSpacing: "0.14em",
+                    color: "antiquewhite",
+                    textTransform: "uppercase",
+                    fontSize: "0.82rem",
+                    cursor: isSaving ? "wait" : "pointer",
+                    transform: isSaving ? "translateY(1px)" : "translateY(0)",
+                    opacity: isSaving ? 0.88 : 1,
+                    transition:
+                      "transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease",
+                    textShadow: "0 0 4px rgba(255,255,255,0.6)",
+                  }}
+                >
+                  {isSaving ? "Summoning..." : "Generate Dream Film"}
+                </button>
               </div>
-            )}
-          </form>
+
+              {error && (
+                <div
+                  style={{
+                    marginTop: "0.75rem",
+                    fontSize: "0.85rem",
+                    color: "#ffb3c1",
+                  }}
+                >
+                  Error: {error}
+                </div>
+              )}
+            </form>
+          </div>
         </div>
       </div>
     </div>

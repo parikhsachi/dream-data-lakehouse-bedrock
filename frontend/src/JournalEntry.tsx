@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import purpleFabric from "../images/bedrock-4.jpeg";
 import fairyBook from "../images/bedrock-10.png";
 import creamPaper from "../images/creampaper.png";
-import scrapMoon from "../images/bedrock-12.jpeg";
 import scrapFlowers from "../images/bedrock-5.jpeg";
 
 type DreamCreate = {

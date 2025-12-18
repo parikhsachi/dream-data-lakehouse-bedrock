@@ -4,7 +4,7 @@ A cinematic dream journal that transforms written dreams and daily context into 
 
 Built on a scalable AWS lakehouse and Bedrock-based pipeline, it ingests, stores, and analyzes dream and film data through structured ETL and ML workflows. The architecture leverages FastAPI, S3 lakehouse storage, Python ETL (Glue / Pandas), and AWS Bedrock foundation models to deliver a full-stack generative and analytics workflow.
 
-This guide assumes you bring your own AWS account, credentials, and S3 buckets.
+This assumes you bring your own AWS account, credentials, and S3 buckets.
 
 ---
 

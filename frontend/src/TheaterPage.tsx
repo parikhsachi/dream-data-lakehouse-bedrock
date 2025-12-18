@@ -1,9 +1,10 @@
 // src/TheaterPage.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import starLake from "../images/bedrock-7.jpeg";
 import starProcession from "../images/bedrock-3.jpeg";
 import spiralClock from "../images/bedrock-11.jpeg";
+import blueVelvet from "../images/bedrock-17.jpeg";
 
 interface DreamRenderResponse {
   movie_script: string;
@@ -25,6 +26,7 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({
   const [data, setData] = useState<DreamRenderResponse | null>(null);
   const [curtainsOpen, setCurtainsOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
 
   useEffect(() => {
     async function runInference() {
@@ -48,8 +50,9 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({
         const json = (await res.json()) as DreamRenderResponse;
         setData(json);
 
-        // small delay before opening curtains for drama
-        setTimeout(() => setCurtainsOpen(true), 1200);
+        if (json.video_url) {
+          setCurtainsOpen(true);
+        }
       } catch (err: any) {
         console.error(err);
         setError(err.message || "Failed to render dream.");
@@ -60,6 +63,20 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({
 
     runInference();
   }, [dreamId]);
+
+  useEffect(() => {
+  if (!curtainsOpen) return;
+  if (!data?.video_url) return;
+
+  const v = videoRef.current;
+  if (!v) return;
+
+  // Request fullscreen once
+  if (v.requestFullscreen) {
+    v.requestFullscreen().catch(() => {});
+  }
+}, [curtainsOpen, data?.video_url]);
+
 
   return (
     <div
@@ -138,7 +155,7 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({
       />
 
       {/* Loading overlay */}
-      {loading && (
+      {!error && !curtainsOpen && (
         <div
           style={{
             position: "absolute",
@@ -159,16 +176,20 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({
           >
             Projecting your dream…
           </div>
+          
           <div
             style={{
-              marginTop: "0.5rem",
+              marginTop: "0.55rem",
               fontSize: "0.8rem",
               letterSpacing: "0.18em",
               textTransform: "uppercase",
               color: "#e6c8ff",
             }}
           >
-            Please remain seated in the twilight zone
+            Please remain seated
+          </div>
+          <div style={{ marginTop: "0.7rem", fontSize: "0.8rem", color: "#d4bff6", opacity: 0.9 }}>
+            (This can take a few minutes. Curtains stay closed until the film arrives.)
           </div>
         </div>
       )}
@@ -229,38 +250,6 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({
               marginBottom: "1.5rem",
             }}
           >
-            <div
-              style={{
-                fontSize: "0.8rem",
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "#d4bff6",
-              }}
-            >
-              Private midnight cinema
-            </div>
-            {onExit && (
-              <button
-                type="button"
-                onClick={onExit}
-                style={{
-                  padding: "0.4rem 1.1rem",
-                  borderRadius: "999px",
-                  border: "1px solid rgba(247,228,171,0.9)",
-                  background:
-                    "linear-gradient(135deg, #f7dd91, #e3b571)",
-                  color: "#3b244d",
-                  fontWeight: 600,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                  fontSize: "0.75rem",
-                  cursor: "pointer",
-                  boxShadow: "0 8px 18px rgba(0,0,0,0.55)",
-                }}
-              >
-                Back to Journal
-              </button>
-            )}
           </header>
 
           {/* SCREEN + VIDEO */}
@@ -269,8 +258,7 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({
               marginBottom: "2.5rem",
               padding: "0.9rem",
               borderRadius: "1.4rem",
-              background:
-                "radial-gradient(circle at top, #f7e3ff 0, #4b205f 40%, #140415 100%)",
+              background: "rgba(210, 175, 100, 0.25)",
               boxShadow:
                 "0 22px 45px rgba(0,0,0,0.8), inset 0 0 35px rgba(0,0,0,0.75)",
               border: "1px solid rgba(250,230,255,0.35)",
@@ -292,6 +280,7 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({
                 pointerEvents: "none",
               }}
             />
+            
 
             <div
               style={{
@@ -307,6 +296,7 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({
             >
               {data.video_url ? (
                 <video
+                  ref={videoRef}
                   src={data.video_url}
                   controls
                   style={{
@@ -330,29 +320,16 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({
                 </div>
               )}
             </div>
-            <div
-              style={{
-                marginTop: "0.4rem",
-                textAlign: "center",
-                fontSize: "0.8rem",
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "#fbe8ff",
-                opacity: 0.85,
-              }}
-            >
-              Now showing: your dream
-            </div>
           </div>
 
           {/* Program notes container */}
           <section
             style={{
-              backgroundColor: "rgba(14,3,26,0.9)",
+              backgroundColor: "rgba(1, 3, 47, 0.9)",
               borderRadius: "20px",
               border: "1px solid rgba(156,118,210,0.65)",
               boxShadow: "0 18px 40px rgba(0,0,0,0.8)",
-              padding: "1.8rem 2rem",
+              padding: "1.5rem 2rem",
             }}
           >
             <h1
@@ -367,6 +344,7 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({
             >
               Dream Film
             </h1>
+            
 
             <p
               style={{
@@ -379,31 +357,37 @@ export const TheaterPage: React.FC<TheaterPageProps> = ({
             >
               {data.movie_script}
             </p>
+            <div
+  style={{
+    display: "flex",
+    justifyContent: "flex-end",
+    marginTop: "1.5rem",
+  }}
+>
+  {onExit && (
+    <button
+      type="button"
+      onClick={onExit}
+      style={{
+        padding: "0.6rem 1.2rem",
+        borderRadius: "999px",
+        backgroundImage: `url(${blueVelvet})`,
+        backgroundSize: "cover",
+        color: "rgba(180, 199, 248, 0.95)",
+        fontWeight: 600,
+        letterSpacing: "0.08em",
+        textTransform: "uppercase",
+        fontSize: "0.75rem",
+        cursor: "pointer",
+        border: "1px solid rgba(3, 2, 57, 0.7)",
+        boxShadow: "0 8px 18px rgba(0,0,0,0.55)",
+      }}
+    >
+      Back to Journal
+    </button>
+  )}
+</div>
 
-            <h2
-              style={{
-                fontSize: "1.1rem",
-                marginBottom: "0.7rem",
-                color: "#dcbaff",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-              }}
-            >
-              Dream Reading
-            </h2>
-
-            <p
-              style={{
-                whiteSpace: "pre-line",
-                lineHeight: 1.55,
-                fontSize: "0.98rem",
-                color: "#e6cfff",
-                borderLeft: "3px solid #9254c8",
-                paddingLeft: "1rem",
-              }}
-            >
-              {data.psychoanalysis}
-            </p>
           </section>
         </div>
       )}

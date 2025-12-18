@@ -102,6 +102,17 @@ input[type="range"].gold-slider::-moz-range-thumb {
   mix-blend-mode: screen;
   animation: button-twinkle 4.2s ease-in-out infinite;
 }
+textarea::placeholder {
+  color: rgba(255, 255, 255);
+}
+textarea {
+  caret-color: white;
+}
+
+textarea::selection {
+  background: rgba(210, 175, 100, 0.35); /* soft gold */
+}
+
 
 .gold-button-twinkle:hover {
   box-shadow:

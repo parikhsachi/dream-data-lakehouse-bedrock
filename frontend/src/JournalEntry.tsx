@@ -351,15 +351,11 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                       <label style={{ fontSize: "1.05rem", color: "#ead9ff" }}>
                         Context
                       </label>
-                      <textarea
+                      <input
                         placeholder="Anything else about your day..."
                         value={form.context_note}
                         onChange={(e) => update("context_note", e.target.value)}
-                        style={{
-                          ...inputStyle,
-                          minHeight: "80px",
-                          resize: "vertical",
-                        }}
+                        style={inputStyle}
                       />
                     </div>
                   </div>
@@ -404,7 +400,7 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                         position: "absolute",
                         inset: "3.8rem 0.4rem 0.9rem 0.8rem",
                         backgroundImage:
-                          "repeating-linear-gradient(to bottom, rgba(210,175,100,0.75) 0, rgba(210,175,100,0.75) 1px, transparent 1px, transparent 24px)",
+                          "repeating-linear-gradient(to bottom, rgba(210,175,100,0.75) 0, rgba(210,175,100,0.75) 1px, transparent 1px, transparent 26px)",
                         pointerEvents: "none",
                         opacity: 1,
                         zIndex: 0,
@@ -427,8 +423,8 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                         border: "1px solid rgba(136,102,164,0.7)",
                         minHeight: "300px",
                         resize: "vertical",
-                        background: "rgba(255,255,255,0.08)",
-                        fontSize: "0.96rem",
+                        background: "rgba(210, 175, 100, 0.25)",
+                        fontSize: "1.2rem",
                         lineHeight: "1.65",
                         color: "white",
                         fontFamily: "var(--font-body)",

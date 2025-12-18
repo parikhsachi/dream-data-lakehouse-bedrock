@@ -32,6 +32,18 @@
     animation: logo-spin infinite 20s linear;
   }
 }
+textarea::placeholder {
+  color: rgba(255, 255, 255);
+}
+
+textarea {
+  caret-color: white;
+}
+
+textarea::selection {
+  background: rgba(210, 175, 100, 0.35); /* soft gold */
+}
+
 
 .card {
   padding: 2em;

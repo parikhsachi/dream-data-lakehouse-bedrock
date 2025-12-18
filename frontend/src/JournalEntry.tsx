@@ -3,6 +3,7 @@ import purpleFabric from "../images/bedrock-4.jpeg";
 import fairyBook from "../images/bedrock-10.png";
 import creamPaper from "../images/creampaper.png";
 import scrapFlowers from "../images/bedrock-5.jpeg";
+import scrapMoon from "../images/bedrock-11.jpeg";
 
 type DreamCreate = {
   mood: number | "";
@@ -70,7 +71,8 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
       const payload = {
         ...form,
         mood: form.mood === "" ? null : Number(form.mood),
-        sleep_quality: form.sleep_quality === "" ? null : Number(form.sleep_quality),
+        sleep_quality:
+          form.sleep_quality === "" ? null : Number(form.sleep_quality),
       };
 
       const res = await fetch("http://127.0.0.1:8000/dreams", {
@@ -89,7 +91,7 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
       if (onDreamCreated) onDreamCreated(data.id);
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "Failed to save dream.");
+      setError(err?.message || "Failed to save dream.");
     } finally {
       setIsSaving(false);
     }
@@ -112,17 +114,6 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
         overflow: "hidden",
       }}
     >
-      {/* OPTIONAL: twinkle overlay if you already have it in CSS */}
-      <div
-        className="twinkle-layer"
-        style={{
-          position: "absolute",
-          inset: 0,
-          pointerEvents: "none",
-          zIndex: 0,
-        }}
-      />
-
       <div
         style={{
           position: "relative",
@@ -131,33 +122,21 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
           zIndex: 1,
         }}
       >
-
-        {/* MAIN NOTEBOOK (paper fills the whole object) */}
-        <div
-          style={{
-            position: "relative",
-            borderRadius: "22px",
-          }}
-        >
-          {/* Paper background layer (oversized to hide transparent PNG border) */}
+        {/* MAIN NOTEBOOK */}
+        <div style={{ position: "relative", borderRadius: "22px" }}>
+          {/* Paper background layer */}
           <div
             style={{
               position: "absolute",
               inset: "-22px",
               backgroundImage: `url(${creamPaper})`,
-              opacity:0.9,
+              opacity: 0.8,
               backgroundSize: "cover",
               backgroundPosition: "center",
               backgroundRepeat: "no-repeat",
               zIndex: 0,
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              inset: 0,
-              pointerEvents: "none",
-              zIndex: 0,
+              transform: "rotate(180deg)",
+              borderRadius: "22px",
             }}
           />
 
@@ -165,46 +144,48 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
             style={{
               position: "relative",
               zIndex: 1,
-              padding: "2.2rem 2.6rem 2.1rem",
+              padding: "1.2rem 3rem 2.1rem",
             }}
           >
-                    {/* Fairy book sticker */}
-        <img
-          src={fairyBook}
-          alt="Dream journal"
-          className="float-soft"
-          style={{
-            position: "absolute",
-            width: "120px",
-            filter: "drop-shadow(0 14px 30px rgba(0,0,0,0.75))",
-            pointerEvents: "none",
-            zIndex: 7,
-          }}
-        />
-            <h1
+            {/* Title row (centered, fairy next to text) */}
+            <div
               style={{
-                fontSize: "3rem",
-                marginLeft: "9rem",
-                color: "antiquewhite",
-                fontFamily: "var(--font-script)",
-                textShadow: "0 0 18px rgba(10,0,18,0.65)",
-                opacity: 0,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "0.9rem",
+                marginBottom: "1.2rem",
               }}
             >
-              Dream Journal
-            </h1>
-
-            <p
-              style={{
-                marginBottom: "1.5rem",
-                fontSize: "0.95rem",
-                color: "#ead9ff",
-                opacity: 0,
-              }}
-            >
-              Left page: your day. Right page: your dream. When you&apos;re ready,
-              we turn it into a film.
-            </p>
+              <img
+                src={fairyBook}
+                alt="Dream journal"
+                className="float-soft"
+                style={{
+                  width: "120px",
+                  height: "px",
+                  objectFit: "contain",
+                  filter: "drop-shadow(0 14px 30px rgba(0,0,0,0.55))",
+                  pointerEvents: "none",
+                }}
+              />
+              <h1
+                style={{
+                  margin: 0,
+                  fontFamily: "var(--font-body)",
+                  fontSize: "3rem",
+                  fontWeight: 7000,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.24em",
+                  color: "rgba(12,10,14,0.9)",
+                  textShadow: "0 1px 0 rgba(255,255,255,0.25)",
+                  borderBottom: "2px solid rgba(12,10,14,0.65)",
+                  display: "inline-block",
+                }}
+              >
+                Dream Journal
+              </h1>
+            </div>
 
             <form onSubmit={handleSubmit}>
               <div
@@ -241,7 +222,7 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                   <div style={{ position: "relative", zIndex: 1 }}>
                     <h2
                       style={{
-                        fontSize: "1.05rem",
+                        fontSize: "1rem",
                         marginBottom: "0.7rem",
                         color: "#f3ddff",
                         textTransform: "uppercase",
@@ -258,7 +239,7 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                       <div style={{ flex: 1 }}>
                         <label
                           style={{
-                            fontSize: "0.8rem",
+                            fontSize: "1.1rem",
                             color: "#ead9ff",
                             display: "block",
                             marginBottom: "0.2rem",
@@ -272,22 +253,20 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                           max={5}
                           className="gold-slider"
                           value={form.mood === "" ? 3 : form.mood}
-                          onChange={(e) =>
-                            update("mood", Number(e.target.value))
-                          }
+                          onChange={(e) => update("mood", Number(e.target.value))}
                         />
                       </div>
 
                       <div style={{ flex: 1 }}>
                         <label
                           style={{
-                            fontSize: "0.8rem",
+                            fontSize: "1.1rem",
                             color: "#ead9ff",
                             display: "block",
                             marginBottom: "0.2rem",
                           }}
                         >
-                          Sleep (1–5)
+                          Sleep Quality (1–5)
                         </label>
                         <input
                           type="range"
@@ -317,7 +296,7 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                     </div>
 
                     <div style={{ marginTop: "0.4rem" }}>
-                      <label style={{ fontSize: "0.8rem", color: "#ead9ff" }}>
+                      <label style={{ fontSize: "1.05rem", color: "#ead9ff" }}>
                         MBTI
                       </label>
                       <input
@@ -330,7 +309,7 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                     </div>
 
                     <div style={{ marginTop: "0.75rem" }}>
-                      <label style={{ fontSize: "0.8rem", color: "#ead9ff" }}>
+                      <label style={{ fontSize: "1.05rem", color: "#ead9ff" }}>
                         Listening to
                       </label>
                       <input
@@ -343,7 +322,7 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                     </div>
 
                     <div style={{ marginTop: "0.5rem" }}>
-                      <label style={{ fontSize: "0.8rem", color: "#ead9ff" }}>
+                      <label style={{ fontSize: "1.05rem", color: "#ead9ff" }}>
                         Watching
                       </label>
                       <input
@@ -356,7 +335,7 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                     </div>
 
                     <div style={{ marginTop: "0.5rem" }}>
-                      <label style={{ fontSize: "0.8rem", color: "#ead9ff" }}>
+                      <label style={{ fontSize: "1.05rem", color: "#ead9ff" }}>
                         Reading
                       </label>
                       <input
@@ -369,8 +348,8 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                     </div>
 
                     <div style={{ marginTop: "0.75rem" }}>
-                      <label style={{ fontSize: "0.8rem", color: "#ead9ff" }}>
-                        Context note
+                      <label style={{ fontSize: "1.05rem", color: "#ead9ff" }}>
+                        Context
                       </label>
                       <textarea
                         placeholder="Anything else about your day..."
@@ -396,18 +375,12 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                     position: "relative",
                     overflow: "hidden",
                     backgroundImage: `url(${scrapFlowers})`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
                   }}
                 >
-
                   <div style={{ position: "relative", zIndex: 1 }}>
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "baseline",
-                        marginBottom: "0.6rem",
-                      }}
-                    >
+                    <div style={{ marginBottom: "0.6rem" }}>
                       <span
                         style={{
                           fontFamily: "var(--font-script)",
@@ -418,61 +391,62 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                           borderRadius: "6px",
                           boxShadow:
                             "0 0 12px rgba(255,255,255,0.5), inset 0 0 8px rgba(0,0,0,0.15)",
+                          display: "inline-block",
                         }}
                       >
                         {todayLabel}
                       </span>
                     </div>
+
+                    {/* Gold ruled lines layer */}
                     <div
                       style={{
                         position: "absolute",
-                        inset: "2.4rem 0.4rem 0.1rem 0.8rem", // match textarea padding
+                        inset: "3.8rem 0.4rem 0.9rem 0.8rem",
                         backgroundImage:
                           "repeating-linear-gradient(to bottom, rgba(210,175,100,0.75) 0, rgba(210,175,100,0.75) 1px, transparent 1px, transparent 24px)",
                         pointerEvents: "none",
                         opacity: 1,
                         zIndex: 0,
+                        borderRadius: "8px",
                       }}
                     />
-                    <div>
+
+                    {/* Textarea */}
                     <textarea
                       required
                       placeholder="Write your dream here..."
                       value={form.narrative}
                       onChange={(e) => update("narrative", e.target.value)}
                       style={{
+                        position: "relative",
+                        zIndex: 1,
                         width: "100%",
                         padding: "0.75rem 0.8rem",
                         borderRadius: "8px",
                         border: "1px solid rgba(136,102,164,0.7)",
                         minHeight: "300px",
                         resize: "vertical",
-                        background: 0.1,
+                        background: "rgba(255,255,255,0.08)",
                         fontSize: "0.96rem",
                         lineHeight: "1.65",
+                        color: "white",
                         fontFamily: "var(--font-body)",
                         outline: "none",
                       }}
                     />
-                    </div>
                   </div>
-                </div>
-              </div>
-                      {/* Scrap images for junk-journal feel */}
 
-              {/* Footer */}
-              <div
-                style={{
-                  marginTop: "1.4rem",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: "1rem",
-                }}
-              >
-                <div style={{ fontSize: "0.82rem", color: "#ead9ff" }}>
+                  {/* Saved ID */}
                   {lastDreamId && (
-                    <span>
+                    <div
+                      style={{
+                        marginTop: "0.75rem",
+                        fontSize: "0.82rem",
+                        color: "#ead9ff",
+                        textAlign: "center",
+                      }}
+                    >
                       Saved entry ID:{" "}
                       <code
                         style={{
@@ -483,48 +457,54 @@ export const JournalEntryPage: React.FC<JournalEntryPageProps> = ({
                         }}
                       >
                         {lastDreamId}
-                      </code>{" "}
-                      – next, we&apos;ll project it as a film.
-                    </span>
+                      </code>
+                    </div>
+                  )}
+
+                  {/* Error */}
+                  {error && (
+                    <div
+                      style={{
+                        marginTop: "0.75rem",
+                        fontSize: "0.85rem",
+                        color: "#ffb3c1",
+                        textAlign: "center",
+                      }}
+                    >
+                      Error: {error}
+                    </div>
                   )}
                 </div>
-
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="gold-button-twinkle"
-                  style={{
-                    padding: "0.85rem 2.1rem",
-                    borderRadius: "999px",
-                    backgroundImage: `url(${scrapFlowers})`,
-                    fontWeight: 700,
-                    letterSpacing: "0.14em",
-                    color: "antiquewhite",
-                    textTransform: "uppercase",
-                    fontSize: "0.82rem",
-                    cursor: isSaving ? "wait" : "pointer",
-                    transform: isSaving ? "translateY(1px)" : "translateY(0)",
-                    opacity: isSaving ? 0.88 : 1,
-                    transition:
-                      "transform 120ms ease, box-shadow 120ms ease, opacity 120ms ease",
-                    textShadow: "0 0 4px rgba(255,255,255,0.6)",
-                  }}
-                >
-                  {isSaving ? "Summoning..." : "Generate Dream Film"}
-                </button>
               </div>
-
-              {error && (
-                <div
-                  style={{
-                    marginTop: "0.75rem",
-                    fontSize: "0.85rem",
-                    color: "#ffb3c1",
-                  }}
-                >
-                  Error: {error}
-                </div>
-              )}
+                                <div
+                    style={{
+                      marginTop: "1rem",
+                      display: "flex",
+                      justifyContent: "right",
+                    }}
+                  >
+                    <button
+                      type="submit"
+                      disabled={isSaving}
+                      style={{
+                        padding: "1.05rem 2.6rem",
+                        borderRadius: "999px",
+                        backgroundImage: `url(${scrapMoon})`,
+                        backgroundSize: "cover",
+                        fontWeight: 1500,
+                        letterSpacing: "0.14em",
+                        color: "white",
+                        textTransform: "uppercase",
+                        fontSize: "0.9rem",
+                        cursor: isSaving ? "wait" : "pointer",
+                        opacity: isSaving ? 0.88 : 1,
+                        border: "1px solid rgba(255,255,255,0.25)",
+                        textShadow: "0 0 4px rgba(255,255,255,0.6)",
+                      }}
+                    >
+                      {isSaving ? "Summoning..." : "Generate"}
+                    </button>
+                  </div>
             </form>
           </div>
         </div>

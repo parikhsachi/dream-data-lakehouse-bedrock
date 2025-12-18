@@ -41,33 +41,6 @@ button {
   border: none;
 }
 
-/* So pointer shows the fancy cursor on interactives */
-button,
-a,
-input,
-textarea {
-  cursor: url('/images/cursor-star.png') 4 4, pointer;
-}
-
-/* Twinkling overlay used on the page background */
-.twinkle-layer {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background-image:
-    radial-gradient(circle at 10% 20%, rgba(255,255,255,0.4) 0, transparent 42%),
-    radial-gradient(circle at 80% 10%, rgba(255,220,255,0.3) 0, transparent 46%),
-    radial-gradient(circle at 20% 80%, rgba(200,180,255,0.28) 0, transparent 44%);
-  mix-blend-mode: screen;
-  opacity: 0.6;
-  animation: twinkle-pan 38s linear infinite;
-}
-
-/* Gentle float for stickers */
-.float-soft {
-  animation: float-soft 16s ease-in-out infinite;
-}
-
 /* GOLD SLIDER (1–5 with star thumb) */
 input[type="range"].gold-slider {
   -webkit-appearance: none;
@@ -115,13 +88,6 @@ input[type="range"].gold-slider::-moz-range-thumb {
   background-size: 90% 90%;
   background-position: center;
   background-repeat: no-repeat;
-}
-
-/* VINTAGE GOLD BUTTON with twinkling overlay */
-.gold-button-twinkle {
-  position: relative;
-  background-color: #f3dd9c;
-  border: 1px solid #b68b3c;
 }
 
 .gold-button-twinkle::after {
